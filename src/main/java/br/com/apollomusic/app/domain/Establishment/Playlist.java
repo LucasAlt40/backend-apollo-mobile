@@ -19,20 +19,10 @@ public class Playlist {
     private Establishment establishment;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "initial_genres_playlist", joinColumns = @JoinColumn(name = "playlist_id"))
-    @Column(name = "genre")
-    private Collection<String> initialGenres;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "blocked_genres_playlist", joinColumns = @JoinColumn(name = "playlist_id"))
-    @Column(name = "genre")
-    private Collection<String> blockedGenres = new HashSet<>();
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "genres_playlist", joinColumns = @JoinColumn(name = "playlist_id"))
-    @MapKeyColumn(name = "genre")
+    @CollectionTable(name = "artists_playlist", joinColumns = @JoinColumn(name = "playlist_id"))
+    @MapKeyColumn(name = "artists")
     @Column(name = "votes")
-    private Map<String, Integer> genres = new HashMap<>();
+    private Map<String, Integer> artists = new HashMap<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "playlist_songs", joinColumns = @JoinColumn(name = "playlist_id"))
@@ -41,13 +31,11 @@ public class Playlist {
     public Playlist() {
     }
 
-    public Playlist(String id, String snapshot, Establishment establishment, Collection<String> initialGenres,Collection<String> blockedGenres, Map<String, Integer> genres, Collection<Song> songs) {
+    public Playlist(String id, String snapshot, Establishment establishment, Map<String, Integer> artists, Collection<Song> songs) {
         this.id = id;
         this.snapshot = snapshot;
         this.establishment = establishment;
-        this.initialGenres = initialGenres;
-        this.blockedGenres = blockedGenres;
-        this.genres = genres;
+        this.artists = artists;
         this.songs = songs;
     }
 
@@ -75,28 +63,12 @@ public class Playlist {
         this.establishment = establishment;
     }
 
-    public Collection<String> getInitialGenres() {
-        return initialGenres;
+    public Map<String, Integer> getArtists() {
+        return artists;
     }
 
-    public void setInitialGenres(Collection<String> initialGenres) {
-        this.initialGenres = initialGenres;
-    }
-
-    public Collection<String> getBlockedGenres() {
-        return blockedGenres;
-    }
-
-    public void setBlockedGenres(Collection<String> blockedGenres) {
-        this.blockedGenres = blockedGenres;
-    }
-
-    public Map<String, Integer> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(Map<String, Integer> genres) {
-        this.genres = genres;
+    public void setArtists(Map<String, Integer> genres) {
+        this.artists = genres;
     }
 
     public Collection<Song> getSongs() {
@@ -113,7 +85,7 @@ public class Playlist {
 
     public Integer getVotesQuantity(){
         Integer votesQuantity = 0;
-        for(Map.Entry<String, Integer> entry: genres.entrySet()){
+        for(Map.Entry<String, Integer> entry: artists.entrySet()){
             if(entry.getValue() != 0){
                 votesQuantity++;
             }
@@ -131,43 +103,33 @@ public class Playlist {
         }
     }
 
-    public void addBlockGenres(Set<String> blockedGenres){
-        this.blockedGenres.addAll(blockedGenres);
-        removeGenres(blockedGenres);
-    }
-
-    public void removeBlockGenres(Set<String> blockedGenres){
-        this.blockedGenres.removeAll(blockedGenres);
-        addGenres(blockedGenres);
-    }
-
-    public void incrementVoteGenre(Set<String> genres){
-        for(String genre: genres){
-            if(this.genres.containsKey(genre)){
-                this.genres.put(genre, this.genres.get(genre) + 1);
+    public void incrementVoteArtist(Set<String> artists){
+        for(String artist: artists){
+            if(this.artists.containsKey(artist)){
+                this.artists.put(artist, this.artists.get(artist) + 1);
             }
         }
     }
 
-    public void decrementVoteGenre(Set<String> genres){
-        for(String genre: genres){
-            if(this.genres.containsKey(genre)){
-                if(this.genres.get(genre) > 0){
-                    this.genres.put(genre, this.genres.get(genre) - 1);
+    public void decrementVoteArtist(Set<String> artists){
+        for(String artist: artists){
+            if(this.artists.containsKey(artist)){
+                if(this.artists.get(artist) > 0){
+                    this.artists.put(artist, this.artists.get(artist) - 1);
                 }
             }
         }
     }
 
-    private void removeGenres(Set<String> genres){
-        for(String genre : genres){
-            this.genres.remove(genre);
+    private void removeArtists(Set<String> artists){
+        for(String artist : artists){
+            this.artists.remove(artist);
         }
     }
 
-    private void addGenres(Set<String> genres){
-        for(String genre : genres){
-            this.genres.put(genre, 0);
+    private void addArtists(Set<String> artists){
+        for(String artist : artists){
+            this.artists.put(artist, 0);
         }
     }
 }

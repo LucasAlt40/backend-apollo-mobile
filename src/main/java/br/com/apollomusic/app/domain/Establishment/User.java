@@ -9,21 +9,21 @@ import java.util.Collection;
 @Embeddable
 public class User {
 
-    private String genres;
+    private String artists; // GENERO AQUI
     private Long expiresIn;
 
     public User() {}
 
-    public User(String genres) {
-        this.genres = genres;
+    public User(String artists) {
+        this.artists = artists;
     }
 
-    public String getGenres() {
-        return genres;
+    public String getArtists() {
+        return artists;
     }
 
-    public void setGenres(String genres) {
-        this.genres = genres;
+    public void setArtists(String genres) {
+        this.artists = genres;
     }
 
     public Long getExpiresIn() {
@@ -35,6 +35,6 @@ public class User {
     }
 
     public void addGenre(Collection<String> genres) {
-        this.genres = String.join(",", genres);
+        this.artists = String.join(",", genres);
     }
 }

@@ -1,8 +1,9 @@
 package br.com.apollomusic.app.presentation;
 
 import br.com.apollomusic.app.domain.payload.request.CreateEstablishmentRequest;
-import br.com.apollomusic.app.domain.payload.request.ManipulateGenreRequest;
+import br.com.apollomusic.app.domain.payload.request.ManipulateArtistRequest;
 import br.com.apollomusic.app.domain.payload.request.SetDeviceRequest;
+import br.com.apollomusic.app.domain.payload.response.ArtistSearchResponse;
 import br.com.apollomusic.app.infra.config.JwtUtil;
 import br.com.apollomusic.app.application.EstablishmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/establishment")
@@ -77,37 +80,37 @@ public class EstablishmentController {
 
     @PutMapping("/playlist/genres/block")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    public ResponseEntity<?> addBlockGenres(Authentication authentication, @RequestBody ManipulateGenreRequest manipulateGenreRequest){
+    public ResponseEntity<?> addBlockGenres(Authentication authentication, @RequestBody ManipulateArtistRequest manipulateArtistRequest){
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
-        return establishmentService.addBlockGenres(establishmentId, manipulateGenreRequest.genres());
+        return establishmentService.addBlockGenres(establishmentId, manipulateArtistRequest.artistIds());
     }
 
     @PutMapping("/playlist/genres/unblock")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    public ResponseEntity<?> removeBlockGenres(Authentication authentication, @RequestBody ManipulateGenreRequest manipulateGenreRequest){
+    public ResponseEntity<?> removeBlockGenres(Authentication authentication, @RequestBody ManipulateArtistRequest manipulateArtistRequest){
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
-        return establishmentService.removeBlockGenres(establishmentId, manipulateGenreRequest.genres());
+        return establishmentService.removeBlockGenres(establishmentId, manipulateArtistRequest.artistIds());
     }
 
     @PostMapping("/playlist/genres/increment")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    public ResponseEntity<?> incrementVoteGenres(Authentication authentication, @RequestBody ManipulateGenreRequest manipulateGenreRequest){
+    public ResponseEntity<?> incrementVoteGenres(Authentication authentication, @RequestBody ManipulateArtistRequest manipulateArtistRequest){
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
-        return establishmentService.incrementVoteGenres(establishmentId, manipulateGenreRequest.genres());
+        return establishmentService.incrementVoteArtists(establishmentId, manipulateArtistRequest.artistIds());
     }
 
     @PostMapping("/playlist/genres/decrement")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    public ResponseEntity<?> decrementVoteGenres(Authentication authentication, @RequestBody ManipulateGenreRequest manipulateGenreRequest){
+    public ResponseEntity<?> decrementVoteGenres(Authentication authentication, @RequestBody ManipulateArtistRequest manipulateArtistRequest){
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
-        return establishmentService.decrementVoteGenres(establishmentId, manipulateGenreRequest.genres());
+        return establishmentService.decrementVoteArtists(establishmentId, manipulateArtistRequest.artistIds());
     }
 
-    @PutMapping("/playlist/genres/initial")
+    @PutMapping("/playlist/artists/initial")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    public ResponseEntity<?> setPlaylistInitialGenres(Authentication authentication, @RequestBody ManipulateGenreRequest manipulateGenreRequest){
+    public ResponseEntity<?> setPlaylistInitialArtists(Authentication authentication, @RequestBody ManipulateArtistRequest manipulateArtistRequest){
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
-        return establishmentService.setPlaylistInitialGenres(establishmentId, manipulateGenreRequest.genres());
+        return establishmentService.setPlaylistInitialArtists(establishmentId, manipulateArtistRequest.artistIds());
     }
 
     @GetMapping("/devices")
@@ -158,6 +161,19 @@ public class EstablishmentController {
     public ResponseEntity<?> skipToPrevious(Authentication authentication) {
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
         return establishmentService.skipToPrevious(establishmentId);
+    }
+
+    @GetMapping("/playlist/search-artists")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
+    public ResponseEntity<List<ArtistSearchResponse>> searchArtists(
+            Authentication authentication,
+            @RequestParam String query
+    ) {
+        Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
+
+        List<ArtistSearchResponse> results = establishmentService.searchArtists(establishmentId, query);
+
+        return ResponseEntity.ok(results);
     }
 
 }

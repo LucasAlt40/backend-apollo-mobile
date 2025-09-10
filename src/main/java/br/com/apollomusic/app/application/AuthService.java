@@ -5,7 +5,6 @@ import br.com.apollomusic.app.domain.Establishment.User;
 import br.com.apollomusic.app.domain.Owner.Owner;
 import br.com.apollomusic.app.domain.payload.request.LoginOwnerRequest;
 import br.com.apollomusic.app.domain.payload.request.LoginUserRequest;
-import br.com.apollomusic.app.domain.payload.request.LogoutUserRequest;
 import br.com.apollomusic.app.domain.payload.response.LoginOwnerResponse;
 import br.com.apollomusic.app.infra.config.JwtUtil;
 import br.com.apollomusic.app.infra.repository.EstablishmentRepository;
@@ -48,7 +47,7 @@ public class AuthService {
 
         apiAuthService.renewTokenIfNeeded(establishment.getOwner().getEmail());
 
-        establishmentService.incrementVoteGenres(establishment.getId(), loginUserRequest.genres());
+        establishmentService.incrementVoteArtists(establishment.getId(), loginUserRequest.genres());
 
         User user = new User();
         user.addGenre(loginUserRequest.genres());

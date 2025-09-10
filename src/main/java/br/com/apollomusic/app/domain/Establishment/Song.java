@@ -8,21 +8,21 @@ import org.hibernate.annotations.Immutable;
 public class Song {
 
     private String uri;
-    private String genre;
+    private String artistId; // GENERO AQUI
 
     public Song() {
     }
 
-    public Song(String uri, String genre) {
+    public Song(String uri, String artistId) {
         this.uri = uri;
-        this.genre = genre;
+        this.artistId = artistId;
     }
 
     public String getUri() {
         return uri;
     }
 
-    public String getGenre() {
-        return genre;
+    public String getArtist() {
+        return artistId;
     }
 }

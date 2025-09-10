@@ -9,7 +9,7 @@ import br.com.apollomusic.app.domain.payload.request.CreatePlaylistRequest;
 import br.com.apollomusic.app.domain.payload.request.RemoveSongsFromPlaylistRequest;
 import br.com.apollomusic.app.domain.payload.request.StartResumePlaybackRequest;
 import br.com.apollomusic.app.domain.payload.response.*;
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -133,4 +133,39 @@ public class ThirdPartyService {
         String endpoint = "/me/player/previous";
         apiService.post(endpoint, null, spotifyAccessToken);
     }
+
+    public List<ArtistSearchResponse> searchArtists(String query, String accessToken) {
+        String endpoint = "/search";
+
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("q", query);
+        queryParams.put("type", "artist");
+
+        String response = apiService.get(endpoint, queryParams, accessToken);
+
+        JsonObject jsonResponse = JsonParser.parseString(response).getAsJsonObject();
+        JsonArray items = jsonResponse
+                .getAsJsonObject("artists")
+                .getAsJsonArray("items");
+
+        List<ArtistSearchResponse> results = new ArrayList<>();
+
+        for (JsonElement item : items) {
+            JsonObject artist = item.getAsJsonObject();
+
+            String id = artist.get("id").getAsString();
+            String name = artist.get("name").getAsString();
+
+            List<String> images = new ArrayList<>();
+            JsonArray imageArray = artist.getAsJsonArray("images");
+            for (JsonElement img : imageArray) {
+                images.add(img.getAsJsonObject().get("url").getAsString());
+            }
+
+            results.add(new ArtistSearchResponse(id, name, images));
+        }
+
+        return results;
+    }
+
 }

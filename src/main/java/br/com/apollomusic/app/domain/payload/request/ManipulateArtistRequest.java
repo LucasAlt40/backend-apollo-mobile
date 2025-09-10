@@ -1,6 +1,6 @@
 package br.com.apollomusic.app.domain.payload.request;
 
 import java.util.Set;
-
-public record ManipulateGenreRequest(Set<String> genres) {
+// GENERO AQUI
+public record ManipulateArtistRequest(Set<String> artistIds) {
 }
