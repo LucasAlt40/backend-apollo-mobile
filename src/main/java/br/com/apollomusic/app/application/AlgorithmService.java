@@ -35,6 +35,8 @@ public class AlgorithmService {
         if (songsQuantityPerArtist == null) return;
 
         Collection<Song> songsInPlaylist = playlist.getSongs();
+
+        resetSongsInPlaylist(playlist.getId(), owner.getAccessToken(), songsInPlaylist, playlist.getSnapshot());
         int songsQuantity;
         Set<Song> songs;
 
@@ -71,6 +73,11 @@ public class AlgorithmService {
                 }
             }
         }
+    }
+
+    private void resetSongsInPlaylist(String playlistId, String accessToken,Collection<Song> songs, String snapshot) {
+        thirdPartyService.removeSongsFromPlaylist(
+                playlistId, snapshot, new HashSet<>(songs), accessToken);
     }
 
     private int getQuantityOfSongInPlaylistByArtist(String artistId, Collection<Song> songs) {
