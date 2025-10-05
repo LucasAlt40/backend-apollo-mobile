@@ -7,7 +7,7 @@ import java.util.*;
 @Entity
 public class Playlist {
 
-    public static final int SONGLIMIT = 50;
+    public static final int SONGLIMIT = 20;
 
     @Id
     private String id;
@@ -107,7 +107,8 @@ public class Playlist {
         for(String artist: artists){
             if(this.artists.containsKey(artist)){
                 this.artists.put(artist, this.artists.get(artist) + 1);
-            }else{
+            }
+            else{
                 this.artists.put(artist, 1); // Remover quando corrigir armazenamento de artistas
             }
         }

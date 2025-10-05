@@ -181,6 +181,18 @@ public class EstablishmentService {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    public void resetPlaylistSongs(long establishmentId) {
+        Establishment establishment = establishmentRepository.findById(establishmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Playlist playlist = establishment.getPlaylist();
+        playlist.setSongs(new HashSet<>());
+
+        establishment.setPlaylist(playlist);
+
+        establishmentRepository.save(establishment);
+    }
+
 
     public ResponseEntity<?> decrementVoteArtists(long establishmentId, Set<String> artistIds) {
         Establishment establishment = establishmentRepository.findById(establishmentId)

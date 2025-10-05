@@ -36,7 +36,7 @@ public class AlgorithmService {
 
         Collection<Song> songsInPlaylist = playlist.getSongs();
 
-        resetSongsInPlaylist(playlist.getId(), owner.getAccessToken(), songsInPlaylist, playlist.getSnapshot());
+       // resetSongsInPlaylist(playlist.getId(), owner.getAccessToken(), songsInPlaylist, playlist.getSnapshot());
         int songsQuantity;
         Set<Song> songs;
 
@@ -66,10 +66,13 @@ public class AlgorithmService {
                         playlist.removeSong(s);
                     }
 
-                    ChangePlaylistResponse changePlaylistResponse = thirdPartyService.removeSongsFromPlaylist(
-                            playlist.getId(), playlist.getSnapshot(), songs, owner.getAccessToken());
-                    playlist.setSnapshot(changePlaylistResponse.snapshot_id());
-                    establishment.setPlaylist(playlist);
+                    if(!songs.isEmpty()) {
+                        ChangePlaylistResponse changePlaylistResponse = thirdPartyService.removeSongsFromPlaylist(
+                                playlist.getId(), playlist.getSnapshot(), songs, owner.getAccessToken());
+                        playlist.setSnapshot(changePlaylistResponse.snapshot_id());
+                        establishment.setPlaylist(playlist);
+                    }
+
                 }
             }
         }
