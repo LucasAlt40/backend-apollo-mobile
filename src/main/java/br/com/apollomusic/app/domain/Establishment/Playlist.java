@@ -107,6 +107,8 @@ public class Playlist {
         for(String artist: artists){
             if(this.artists.containsKey(artist)){
                 this.artists.put(artist, this.artists.get(artist) + 1);
+            }else{
+                this.artists.put(artist, 1); // Remover quando corrigir armazenamento de artistas
             }
         }
     }

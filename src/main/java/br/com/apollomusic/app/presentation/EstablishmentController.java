@@ -176,4 +176,13 @@ public class EstablishmentController {
         return ResponseEntity.ok(results);
     }
 
+    @GetMapping("/playlist/for-user/search-artists")
+    public ResponseEntity<List<ArtistSearchResponse>> searchArtistsForUser(
+            @RequestParam Long establishmentId,
+            @RequestParam String query
+    ) {
+        List<ArtistSearchResponse> results = establishmentService.searchArtists(establishmentId, query);
+        return ResponseEntity.ok(results);
+    }
+
 }
