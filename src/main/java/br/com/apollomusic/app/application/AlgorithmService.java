@@ -5,7 +5,6 @@ import br.com.apollomusic.app.domain.Owner.Owner;
 import br.com.apollomusic.app.domain.Establishment.Playlist;
 import br.com.apollomusic.app.domain.Establishment.Song;
 import br.com.apollomusic.app.domain.payload.response.ChangePlaylistResponse;
-import br.com.apollomusic.app.domain.payload.response.RecommendationsResponse;
 import br.com.apollomusic.app.domain.payload.response.TopTracksResponse;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,6 @@ public class AlgorithmService {
 
         Collection<Song> songsInPlaylist = playlist.getSongs();
 
-       // resetSongsInPlaylist(playlist.getId(), owner.getAccessToken(), songsInPlaylist, playlist.getSnapshot());
         int songsQuantity;
         Set<Song> songs;
 
@@ -48,7 +46,7 @@ public class AlgorithmService {
 
             if (songsQuantity != desiredQuantity) {
                 if (songsQuantity < desiredQuantity) {
-                    songs = getTopTracksByArtist(desiredQuantity - songsQuantity, artistId, owner.getAccessToken());
+                    songs = getTopTracksByArtist(Integer.valueOf(desiredQuantity - songsQuantity), artistId, owner.getAccessToken(), songsInPlaylist);
 
                     for (Song s : songs) {
                         playlist.addSong(s);
@@ -113,7 +111,7 @@ public class AlgorithmService {
         return result;
     }
 
-    private Set<Song> getTopTracksByArtist(Integer quantity, String artistId, String accessToken) {
+    private Set<Song> getTopTracksByArtist(Integer quantity, String artistId, String accessToken, Collection<Song> songsInPlaylist) {
         Set<Song> songs = new HashSet<>();
         String endpoint = "/artists/" + artistId + "/top-tracks";
 
@@ -125,13 +123,22 @@ public class AlgorithmService {
 
         List<TopTracksResponse.Track> tracks = topTracksResponse.getTracks();
 
-        for (int i = 0; i < Math.min(quantity, tracks.size()); i++) {
-            var track = tracks.get(i);
-            songs.add(new Song(track.getUri(), artistId));
+        Set<String> existingUris = new HashSet<>();
+        for (Song s : songsInPlaylist) {
+            existingUris.add(s.getUri());
+        }
+
+        for (TopTracksResponse.Track track : tracks) {
+            if (!existingUris.contains(track.getUri())) {
+                songs.add(new Song(track.getUri(), artistId));
+            }
+
+            if (songs.size() >= quantity) break;
         }
 
         return songs;
     }
+
 
     private HashMap<String, Integer> getSongsQuantityPerArtist(Playlist playlist){
         if(playlist == null) return null;
