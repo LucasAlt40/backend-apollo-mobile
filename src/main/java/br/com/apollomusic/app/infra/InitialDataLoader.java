@@ -46,6 +46,8 @@ public class InitialDataLoader implements CommandLineRunner {
             establishment.setName("Bar do Zinho");
             establishment.setOff(true);
             establishment.setOwner(owner);
+            establishment.setLatitude("-21.7865535");
+            establishment.setLongitude("-48.1808441");
 
             establishmentRepository.save(establishment);
 

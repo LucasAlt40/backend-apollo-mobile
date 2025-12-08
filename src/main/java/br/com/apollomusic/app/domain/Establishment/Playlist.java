@@ -14,6 +14,8 @@ public class Playlist {
 
     private String snapshot;
 
+    private String initialArtists;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "establishment_id")
     private Establishment establishment;
@@ -122,6 +124,14 @@ public class Playlist {
                 }
             }
         }
+    }
+
+    public String getInitialArtists() {
+        return initialArtists;
+    }
+
+    public void setInitialArtists(String initialArtists) {
+        this.initialArtists = initialArtists;
     }
 
     private void removeArtists(Set<String> artists){

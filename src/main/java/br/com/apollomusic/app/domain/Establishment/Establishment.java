@@ -19,6 +19,10 @@ public class Establishment {
 
     private String name;
 
+    private String latitude;
+
+    private String longitude;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id")
     private Owner owner;
@@ -33,7 +37,7 @@ public class Establishment {
     public Establishment() {
     }
 
-    public Establishment(Long id, String deviceId, boolean isOff, String name, Owner owner, Playlist playlist, Collection<User> users) {
+    public Establishment(Long id, String deviceId, boolean isOff, String name, Owner owner, Playlist playlist, Collection<User> users,  String latitude, String longitude) {
         this.id = id;
         this.deviceId = deviceId;
         this.isOff = isOff;
@@ -41,6 +45,8 @@ public class Establishment {
         this.owner = owner;
         this.playlist = playlist;
         this.users = users;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Long getId() {
@@ -89,6 +95,22 @@ public class Establishment {
 
     public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 
     public boolean playlistHasInitialGenres(){

@@ -7,6 +7,7 @@ import br.com.apollomusic.app.domain.payload.request.LoginOwnerRequest;
 import br.com.apollomusic.app.domain.payload.request.LoginUserRequest;
 import br.com.apollomusic.app.domain.payload.response.LoginOwnerResponse;
 import br.com.apollomusic.app.infra.config.JwtUtil;
+import br.com.apollomusic.app.infra.config.LocalizationUtils;
 import br.com.apollomusic.app.infra.repository.EstablishmentRepository;
 import br.com.apollomusic.app.infra.repository.OwnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,12 @@ public class AuthService {
 
         if (establishment.isOff()) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+
+        Double userDistance = LocalizationUtils.calculeDistance(loginUserRequest.latitude(),loginUserRequest.longitude(), establishment.getLatitude(), establishment.getLongitude());
+
+        if (userDistance >= 100){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         apiAuthService.renewTokenIfNeeded(establishment.getOwner().getEmail());

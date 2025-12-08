@@ -45,6 +45,9 @@ public class EstablishmentService {
             newEstablishment.setName(createEstablishmentRequest.name());
             newEstablishment.setOff(true);
             newEstablishment.setOwner(owner);
+            newEstablishment.setLatitude(createEstablishmentRequest.latitude());
+            newEstablishment.setLongitude(createEstablishmentRequest.longitude());
+
             establishmentRepository.save(newEstablishment);
             return new ResponseEntity<>(newEstablishment.getId(), HttpStatus.CREATED);
         }
@@ -104,6 +107,12 @@ public class EstablishmentService {
         }
 
         playlist.setArtists(artistsVotesReset);
+
+        Set<String> artists = Arrays.stream(
+                playlist.getInitialArtists().split(",")
+        ).map(String::trim).collect(Collectors.toSet());
+
+        playlist.incrementVoteArtist(artists);
 
         establishment.setUser(new HashSet<>());
 
@@ -169,6 +178,28 @@ public class EstablishmentService {
         if (playlist == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        playlist.incrementVoteArtist(artistIds);
+
+        establishment.setPlaylist(playlist);
+
+        algorithmService.runAlgorithm(establishment);
+
+        establishmentRepository.save(establishment);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<?> incrementInitialVotesArtists(long establishmentId, Set<String> artistIds) {
+        Establishment establishment = establishmentRepository.findById(establishmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Playlist playlist = establishment.getPlaylist();
+        if (playlist == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        playlist.setInitialArtists(String.join(",", artistIds));
 
         playlist.incrementVoteArtist(artistIds);
 
