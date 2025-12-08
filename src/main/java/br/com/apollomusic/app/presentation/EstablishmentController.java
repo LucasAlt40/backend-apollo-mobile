@@ -110,7 +110,7 @@ public class EstablishmentController {
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public ResponseEntity<?> setPlaylistInitialArtists(Authentication authentication, @RequestBody ManipulateArtistRequest manipulateArtistRequest){
         Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
-        return establishmentService.setPlaylistInitialArtists(establishmentId, manipulateArtistRequest.artistIds());
+        return establishmentService.incrementInitialVotesArtists(establishmentId, manipulateArtistRequest.artistIds());
     }
 
     @GetMapping("/devices")
