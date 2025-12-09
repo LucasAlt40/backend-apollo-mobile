@@ -35,42 +35,50 @@ public class AlgorithmService {
 
         Collection<Song> songsInPlaylist = playlist.getSongs();
 
-        int songsQuantity;
-        Set<Song> songs;
-
         for (var entry : songsQuantityPerArtist.entrySet()) {
             String artistId = entry.getKey();
             int desiredQuantity = entry.getValue();
 
-            songsQuantity = getQuantityOfSongInPlaylistByArtist(artistId, songsInPlaylist);
+            int songsQuantity = getQuantityOfSongInPlaylistByArtist(artistId, songsInPlaylist);
+            Set<Song> songs;
 
             if (songsQuantity != desiredQuantity) {
-                if (songsQuantity < desiredQuantity) {
-                    songs = getTopTracksByArtist(Integer.valueOf(desiredQuantity - songsQuantity), artistId, owner.getAccessToken(), songsInPlaylist);
 
-                    for (Song s : songs) {
-                        playlist.addSong(s);
+                if (songsQuantity < desiredQuantity) {
+                    int quantityToAdd = desiredQuantity - songsQuantity;
+                    songs = getTopTracksByArtist(quantityToAdd, artistId, owner.getAccessToken(), songsInPlaylist);
+
+                    if (songs != null && !songs.isEmpty()) {
+                        for (Song s : songs) {
+                            playlist.addSong(s);
+                        }
+
+                        ChangePlaylistResponse changePlaylistResponse = thirdPartyService.addSongsToPlaylist(
+                                playlist.getId(), songs, owner.getAccessToken());
+
+                        if (changePlaylistResponse != null) {
+                            playlist.setSnapshot(changePlaylistResponse.snapshot_id());
+                        }
+                        establishment.setPlaylist(playlist);
                     }
 
-                    ChangePlaylistResponse changePlaylistResponse = thirdPartyService.addSongsToPlaylist(
-                            playlist.getId(), songs, owner.getAccessToken());
-                    playlist.setSnapshot(changePlaylistResponse.snapshot_id());
-                    establishment.setPlaylist(playlist);
-
                 } else {
-                    songs = getRandomSongsInPlaylistByArtist(desiredQuantity - songsQuantity, artistId, songsInPlaylist);
+                    int quantityToRemove = songsQuantity - desiredQuantity;
+                    songs = getRandomSongsInPlaylistByArtist(quantityToRemove, artistId, songsInPlaylist);
 
                     for (Song s : songs) {
                         playlist.removeSong(s);
                     }
 
-                    if(!songs.isEmpty()) {
+                    if (songs != null && !songs.isEmpty()) {
                         ChangePlaylistResponse changePlaylistResponse = thirdPartyService.removeSongsFromPlaylist(
                                 playlist.getId(), playlist.getSnapshot(), songs, owner.getAccessToken());
-                        playlist.setSnapshot(changePlaylistResponse.snapshot_id());
+
+                        if (changePlaylistResponse != null) {
+                            playlist.setSnapshot(changePlaylistResponse.snapshot_id());
+                        }
                         establishment.setPlaylist(playlist);
                     }
-
                 }
             }
         }

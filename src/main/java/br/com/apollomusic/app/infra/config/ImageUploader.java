@@ -18,7 +18,7 @@ import java.util.UUID;
 public class ImageUploader {
 
     private final String bucket = "publico";
-    private final String endpoint = "http://10.105.226.31:9000";
+    private final String endpoint = "http://192.168.0.17:9000";
     private final String accessKey = "minioadmin";
     private final String secretKey = "minioadmin123";
 
