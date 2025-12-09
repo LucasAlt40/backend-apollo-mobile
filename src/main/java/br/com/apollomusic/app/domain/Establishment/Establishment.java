@@ -3,8 +3,10 @@ package br.com.apollomusic.app.domain.Establishment;
 import br.com.apollomusic.app.domain.Owner.Owner;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 @Entity
 public class Establishment {
@@ -33,6 +35,10 @@ public class Establishment {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user", joinColumns = @JoinColumn(name = "establishment_id"))
     private Collection<User> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "establishment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
+
 
     public Establishment() {
     }
@@ -119,6 +125,22 @@ public class Establishment {
         }
         return false;
     }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public Post addPost(Post post) {
+        post.setEstablishment(this);
+        posts.add(post);
+        return post;
+    }
+
+    public void removePost(Post post) {
+        posts.remove(post);
+        post.setEstablishment(null);
+    }
+
 
     public Collection<User> getUser() {
         return users;
