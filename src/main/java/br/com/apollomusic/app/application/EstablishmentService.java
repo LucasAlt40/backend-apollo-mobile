@@ -2,17 +2,22 @@ package br.com.apollomusic.app.application;
 
 import br.com.apollomusic.app.domain.Establishment.Establishment;
 import br.com.apollomusic.app.domain.Establishment.Playlist;
+import br.com.apollomusic.app.domain.Establishment.Post;
 import br.com.apollomusic.app.domain.Establishment.User;
 import br.com.apollomusic.app.domain.Owner.Owner;
 import br.com.apollomusic.app.domain.payload.request.CreateEstablishmentRequest;
+import br.com.apollomusic.app.domain.payload.request.CreatePostRequest;
 import br.com.apollomusic.app.domain.payload.request.SetDeviceRequest;
 import br.com.apollomusic.app.domain.payload.response.*;
+import br.com.apollomusic.app.infra.config.ImageUploader;
 import br.com.apollomusic.app.infra.repository.EstablishmentRepository;
 import br.com.apollomusic.app.infra.repository.OwnerRepository;
+import br.com.apollomusic.app.infra.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -25,13 +30,17 @@ public class EstablishmentService {
     private final OwnerRepository ownerRepository;
     private final ThirdPartyService thirdPartyService;
     private final AlgorithmService algorithmService;
+    private final ImageUploader imageUploader;
+    private final PostRepository postRepository;
 
     @Autowired
-    public EstablishmentService(EstablishmentRepository establishmentRepository, OwnerRepository ownerRepository, ThirdPartyService thirdPartyService, AlgorithmService algorithmService) {
+    public EstablishmentService(EstablishmentRepository establishmentRepository, OwnerRepository ownerRepository, ThirdPartyService thirdPartyService, AlgorithmService algorithmService, ImageUploader imageUploader, PostRepository postRepository) {
         this.establishmentRepository = establishmentRepository;
         this.ownerRepository = ownerRepository;
         this.thirdPartyService = thirdPartyService;
         this.algorithmService = algorithmService;
+        this.imageUploader = imageUploader;
+        this.postRepository = postRepository;
     }
 
     public ResponseEntity<?> createEstablishment(CreateEstablishmentRequest createEstablishmentRequest){
@@ -442,6 +451,84 @@ public class EstablishmentService {
         return thirdPartyService.searchArtists(query, accessToken);
     }
 
+    public CreatePostResponse createPost(CreatePostRequest createPostRequest) throws Exception {
+
+        Establishment establishment = establishmentRepository.findById(createPostRequest.establishmentId().get())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Estabelecimento não encontrado"
+                ));
+
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile img : createPostRequest.images()) {
+            String url = imageUploader.upload(img);
+            urls.add(url);
+        }
+
+        Post post = new Post(
+                createPostRequest.username(),
+                createPostRequest.content(),
+                urls,
+                establishment
+        );
+
+        post = postRepository.save(post);
+
+        establishment.addPost(post);
+
+        return new CreatePostResponse(
+                post.getId(),
+                post.getUsername(),
+                post.getContent(),
+                post.getImageUrls(),
+                establishment.getId()
+        );
+    }
+
+
+
+    public List<CreatePostResponse> findAllPosts(Long establishmentId) {
+
+        Establishment establishment = establishmentRepository.findById(establishmentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Estabelecimento não encontrado"
+                ));
+
+        return establishment.getPosts()
+                .stream()
+                .map(post -> new CreatePostResponse(
+                        post.getId(),
+                        post.getUsername(),
+                        post.getContent(),
+                        post.getImageUrls(),
+                        establishment.getId()
+                ))
+                .toList();
+    }
+
+
+    public ResponseEntity<?> removePost(Long establishmentId, Long postId) {
+
+        Establishment establishment = establishmentRepository.findById(establishmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estabelecimento não encontrado"));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post não encontrado"));
+
+        if (!post.getEstablishment().getId().equals(establishmentId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este post não pertence ao estabelecimento informado");
+        }
+
+        establishment.getPosts().remove(post);
+        post.setEstablishment(null);
+
+        postRepository.delete(post);
+
+        establishmentRepository.save(establishment);
+
+        return ResponseEntity.ok("Post removido com sucesso");
+    }
 
 
 }

@@ -1,9 +1,11 @@
 package br.com.apollomusic.app.presentation;
 
 import br.com.apollomusic.app.domain.payload.request.CreateEstablishmentRequest;
+import br.com.apollomusic.app.domain.payload.request.CreatePostRequest;
 import br.com.apollomusic.app.domain.payload.request.ManipulateArtistRequest;
 import br.com.apollomusic.app.domain.payload.request.SetDeviceRequest;
 import br.com.apollomusic.app.domain.payload.response.ArtistSearchResponse;
+import br.com.apollomusic.app.domain.payload.response.CreatePostResponse;
 import br.com.apollomusic.app.infra.config.JwtUtil;
 import br.com.apollomusic.app.application.EstablishmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/establishment")
@@ -184,5 +187,42 @@ public class EstablishmentController {
         List<ArtistSearchResponse> results = establishmentService.searchArtists(establishmentId, query);
         return ResponseEntity.ok(results);
     }
+
+    @PostMapping("/posts")
+    public ResponseEntity<?> createPost(
+            @ModelAttribute CreatePostRequest createPostRequest,
+            Authentication authentication
+    ) throws Exception {
+        Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
+        String username = authentication.getName();
+
+        CreatePostResponse response = establishmentService.createPost(
+                new CreatePostRequest(
+                        username,
+                        createPostRequest.content(),
+                        createPostRequest.images(),
+                        Optional.of(establishmentId)
+                )
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<?> getPosts(Authentication authentication) {
+        Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
+        return ResponseEntity.ok(establishmentService.findAllPosts(establishmentId));
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
+    public ResponseEntity<?> deletePost(
+            @PathVariable Long postId,
+            Authentication authentication
+    ) {
+        Long establishmentId = jwtUtil.extractItemFromToken(authentication, "establishmentId");
+        return establishmentService.removePost(establishmentId, postId);
+    }
+
 
 }

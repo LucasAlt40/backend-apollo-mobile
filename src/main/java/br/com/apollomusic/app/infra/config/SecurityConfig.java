@@ -66,6 +66,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/admin/owner").permitAll()
                         .requestMatchers(HttpMethod.GET, "/establishment/playlist/genres/{establishmentId}").permitAll()
                         .requestMatchers(HttpMethod.GET,"/establishment/playlist/for-user/search-artists").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/establishment/posts").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/establishment/posts").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtDecoder())))
